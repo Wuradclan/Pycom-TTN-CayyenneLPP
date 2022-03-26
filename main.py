@@ -10,6 +10,7 @@ from SI7006A20 import SI7006A20
 from LTR329ALS01 import LTR329ALS01
 from MPL3115A2 import MPL3115A2,ALTITUDE,PRESSURE
 from network import LoRa
+import cayenneLPP
 
 pycom.heartbeat(False)
 pycom.rgbled(0x0A0A08) # white
@@ -62,6 +63,7 @@ while True:
     # make the socket blocking
     # (waits for the data to be sent and for the 2 receive windows to expire)
     s.setblocking(True)
+    lpp = cayenneLPP.CayenneLPP(size = 100, sock = s)
     # Read the values from the sensors
     voltage = pysense.read_battery_voltage()
     temperature = mpl3115a2.temperature()
@@ -73,17 +75,24 @@ while True:
     # Debug sensor values
     print('voltage:{}, temperature:{}, pressure:{}, light:{}, humidity:{}, roll:{}, pitch:{}'.format(voltage, temperature, pressure, light, humidity, roll, pitch))
     # Convert to byte array for transmission
-    clean_bytes = struct.pack(">iiiiiii",
-        int(temperature * 100), # Temperature in celcius
-        int(pressure * 100), # Atmospheric pressure in bar
-        int(light * 100), # Light in lux
-        int(humidity * 100), # Humidity in percentages
-        int(roll * 100), # Roll in degrees in the range -180 to 180
-        int(pitch * 100), # Pitch in degrees in the range -90 to 90
-        int(voltage * 100)) # Battery voltage
-    s.send(clean_bytes)
+    lpp.add_temperature (temperature, channel = 1) # Temperature in celcius
+    lpp.add_relative_humidity(humidity, channel = 2)
+    lpp.send(reset_payload = True)
     print("Bytes sent, sleeping for 10 secs")
     time.sleep(10)
+    
+    # # Convert to byte array for transmission
+    # clean_bytes = struct.pack(">iiiiiii",
+    #     int(temperature * 100), # Temperature in celcius
+    #     int(pressure * 100), # Atmospheric pressure in bar
+    #     int(light * 100), # Light in lux
+    #     int(humidity * 100), # Humidity in percentages
+    #     int(roll * 100), # Roll in degrees in the range -180 to 180
+    #     int(pitch * 100), # Pitch in degrees in the range -90 to 90
+    #     int(voltage * 100)) # Battery voltage
+    # s.send(clean_bytes)
+    # print("Bytes sent, sleeping for 10 secs")
+    # time.sleep(10)
     # make the socket non-blocking
     # (because if there's no data received it will block forever...)
     s.setblocking(False)
