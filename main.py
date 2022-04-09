@@ -30,7 +30,7 @@ lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.US915)
 
 # create an OTAA authentication parameters, change them to the provided credentials
 app_eui = ubinascii.unhexlify('0000000000000000')
-app_key = ubinascii.unhexlify('4135CDD883100D0876B99960A334E2F4')
+app_key = ubinascii.unhexlify('07379DD99A7C209E98D0E7FDAED693BC')
 #uncomment to use LoRaWAN application provided dev_eui
 dev_eui = ubinascii.unhexlify('70B3D5499BAC188B')
 
@@ -80,19 +80,6 @@ while True:
     lpp.send(reset_payload = True)
     print("Bytes sent, sleeping for 10 secs")
     time.sleep(10)
-    
-    # # Convert to byte array for transmission
-    # clean_bytes = struct.pack(">iiiiiii",
-    #     int(temperature * 100), # Temperature in celcius
-    #     int(pressure * 100), # Atmospheric pressure in bar
-    #     int(light * 100), # Light in lux
-    #     int(humidity * 100), # Humidity in percentages
-    #     int(roll * 100), # Roll in degrees in the range -180 to 180
-    #     int(pitch * 100), # Pitch in degrees in the range -90 to 90
-    #     int(voltage * 100)) # Battery voltage
-    # s.send(clean_bytes)
-    # print("Bytes sent, sleeping for 10 secs")
-    # time.sleep(10)
     # make the socket non-blocking
     # (because if there's no data received it will block forever...)
     s.setblocking(False)
